@@ -23,7 +23,7 @@
     <ProjectGuid>{E69E1597-4570-4115-BAE6-EC49177F62E8}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>MaiSense</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -42,15 +42,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
-    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v141</PlatformToolset>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v142</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
-    <CharacterSet>Unicode</CharacterSet>
+    <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -200,6 +200,7 @@
     <ClInclude Include="include\MaiSense\MouseEvent.hpp" />
     <ClInclude Include="include\MaiSense\Point.hpp" />
     <ClInclude Include="include\MaiSense\SensorRegion.hpp" />
+    <ClInclude Include="include\MaiSense\SerialController.hpp" />
     <ClInclude Include="include\MaiSense\TouchController.hpp" />
     <ClInclude Include="include\MaiSense\TouchEvent.hpp" />
     <ClInclude Include="include\MaiSense\SensorChecker.hpp" />
@@ -212,6 +213,7 @@
     <ClCompile Include="src\KeyboardController.cpp" />
     <ClCompile Include="src\MouseController.cpp" />
     <ClCompile Include="src\SensorRegion.cpp" />
+    <ClCompile Include="src\SerialController.cpp" />
     <ClCompile Include="src\TouchController.cpp" />
     <ClCompile Include="src\SensorChecker.cpp" />
     <ClCompile Include="src\SensorProcessor.cpp" />

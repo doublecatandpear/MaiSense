@@ -49,6 +49,9 @@
     <ClInclude Include="include\MaiSense\TouchEvent.hpp">
       <Filter>Headers</Filter>
     </ClInclude>
+    <ClInclude Include="include\MaiSense\SerialController.hpp">
+      <Filter>Headers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="src\Sensor.cpp">
@@ -76,6 +79,9 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="src\SensorProcessor.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="src\SerialController.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>

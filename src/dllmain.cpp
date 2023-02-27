@@ -5,6 +5,7 @@
 #include <MaiSense/MouseController.hpp>
 #include <MaiSense/SensorChecker.hpp>
 #include <MaiSense/SensorProcessor.hpp>
+#include <MaiSense/SerialController.hpp>
 
 #include <string>
 
@@ -15,6 +16,7 @@ using namespace MaiSense;
 TouchController touchController;
 KeyboardController keyboardController;
 MouseController mouseController;
+SerialController serialController;
 SensorChecker sensorChecker;
 SensorProcessor processor;
 
@@ -28,6 +30,66 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD cause, LPVOID lpReserved)
         AllocConsole();
         freopen("CONIN$", "r", stdin);
         freopen("CONOUT$", "w", stdout);
+
+        serialController.SetCallback([&](SerialEvent ev) 
+        {
+            auto sensor = InputManager::GetSensor();
+            switch (ev.Id)
+            {
+            case Mai2TouchId::A1:
+                sensor->Queue(Sensor::A1, ev.Active);
+                break;
+            case Mai2TouchId::A2:
+                sensor->Queue(Sensor::A2, ev.Active);
+                break;
+            case Mai2TouchId::A3:
+                sensor->Queue(Sensor::A3, ev.Active);
+                break;
+            case Mai2TouchId::A4:
+                sensor->Queue(Sensor::A4, ev.Active);
+                break;
+            case Mai2TouchId::A5:
+                sensor->Queue(Sensor::A5, ev.Active);
+                break;
+            case Mai2TouchId::A6:
+                sensor->Queue(Sensor::A6, ev.Active);
+                break;
+            case Mai2TouchId::A7:
+                sensor->Queue(Sensor::A7, ev.Active);
+                break;
+            case Mai2TouchId::A8:
+                sensor->Queue(Sensor::A8, ev.Active);
+                break;
+            case Mai2TouchId::B1:
+                sensor->Queue(Sensor::B1, ev.Active);
+                break;
+            case Mai2TouchId::B2:
+                sensor->Queue(Sensor::B2, ev.Active);
+                break;
+            case Mai2TouchId::B3:
+                sensor->Queue(Sensor::B3, ev.Active);
+                break;
+            case Mai2TouchId::B4:
+                sensor->Queue(Sensor::B4, ev.Active);
+                break;
+            case Mai2TouchId::B5:
+                sensor->Queue(Sensor::B5, ev.Active);
+                break;
+            case Mai2TouchId::B6:
+                sensor->Queue(Sensor::B6, ev.Active);
+                break;
+            case Mai2TouchId::B7:
+                sensor->Queue(Sensor::B7, ev.Active);
+                break;
+            case Mai2TouchId::B8:
+                sensor->Queue(Sensor::B8, ev.Active);
+                break;
+            case Mai2TouchId::C1:
+            case Mai2TouchId::C2:
+                sensor->Queue(Sensor::C, ev.Active);
+                break;
+            }
+        });
 
         touchController.SetCallback([&](TouchEvent ev) 
         {
