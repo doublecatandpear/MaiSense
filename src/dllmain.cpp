@@ -1,4 +1,4 @@
-#include <MaiSense/Sensor.hpp>
+﻿#include <MaiSense/Sensor.hpp>
 #include <MaiSense/InputManager.hpp>
 #include <MaiSense/TouchController.hpp>
 #include <MaiSense/KeyboardController.hpp>
@@ -8,6 +8,7 @@
 #include <MaiSense/SerialController.hpp>
 
 #include <string>
+#include <tchar.h>
 
 #pragma warning (disable : 4996)
 
@@ -19,6 +20,105 @@ MouseController mouseController;
 SerialController serialController;
 SensorChecker sensorChecker;
 SensorProcessor processor;
+
+HANDLE GetSerialHandle() {
+    HANDLE hCom; //全局变量，串口句柄
+    hCom = CreateFile(_T("COM1:"),//COM1口
+        GENERIC_READ, //允许读和写
+        0, //独占方式
+        NULL,
+        OPEN_EXISTING, //打开而不是创建
+        0, //同步方式
+        NULL);
+
+    if (hCom == (HANDLE)-1) {
+        return NULL;
+    }
+
+    // 配置缓冲区大小
+    if (!SetupComm(hCom, 1024, 1024)) {
+        return NULL;
+    }
+
+    // 配置参数
+    DCB p;
+    memset(&p, 0, sizeof(p));
+    p.DCBlength = sizeof(p);
+    p.BaudRate = 9600;
+    p.ByteSize = 8;
+    p.Parity = NOPARITY;
+    p.StopBits = ONESTOPBIT;
+
+    if (!SetCommState(hCom, &p)) {
+        // 设置参数失败
+        return NULL;
+    }
+
+    //超时处理,单位：毫秒
+    //总超时＝时间系数×读或写的字符数＋时间常量
+    COMMTIMEOUTS TimeOuts;
+    TimeOuts.ReadIntervalTimeout = 1000; //读间隔超时
+    TimeOuts.ReadTotalTimeoutMultiplier = 500; //读时间系数
+    TimeOuts.ReadTotalTimeoutConstant = 5000; //读时间常量
+    TimeOuts.WriteTotalTimeoutMultiplier = 500; // 写时间系数
+    TimeOuts.WriteTotalTimeoutConstant = 2000; //写时间常量
+    SetCommTimeouts(hCom, &TimeOuts);
+
+    PurgeComm(hCom, PURGE_TXCLEAR | PURGE_RXCLEAR);//清空串口缓冲区
+
+
+    return hCom;
+}
+
+BOOL ReadSerialData(HANDLE hSerial, LPVOID lpBuffer, DWORD nNumberOfBytesToRead, LPDWORD lpNumberOfBytesRead) {
+    BOOL bSuccess = ReadFile(hSerial, lpBuffer, nNumberOfBytesToRead, lpNumberOfBytesRead, NULL);
+    return bSuccess;
+}
+
+DWORD WINAPI SerialCommThread(LPVOID lpParam) {
+    //创建消息队列
+    MSG msg;
+    //PeekMessage(&msg, NULL, WM_USER, WM_MAI2TOUCH_MESSAGE, PM_NOREMOVE);
+    PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE);
+
+    HANDLE hSerial = GetSerialHandle();
+    while (true) {
+        // 读取串口数据
+        BYTE buffer[9];
+        DWORD bytesRead = 0;
+        BOOL success = ReadSerialData(hSerial, buffer, 9, &bytesRead);
+        if (success) {
+            // 处理哪些区域被触发
+            Mai2TouchData data;
+            if (buffer[0] == '(' && buffer[8] == ')') {
+                uint64_t touchData = 0;
+                for (int i = 7; i >= 1; i--) {
+                    touchData = (touchData << 5) | (buffer[i] - '0');
+                }
+
+                uint16_t mprA = touchData & 0xFFFF; //A1~B4
+                uint16_t mprB = (touchData >> 12) & 0xFFFF; //B5~D6
+                uint16_t mprC = (touchData >> 24) & 0xFFFF; //D7~E8
+
+                //bool switchesB[12], switchesC[12];
+                for (int i = 0; i < 12; i++) {
+                    if (mprB & (1 << i) != 0) {
+                        data.activeArea.push_back((Mai2TouchId)(B5 + i));
+                    }
+                    if (mprC & (1 << i) != 0) {
+                        data.activeArea.push_back((Mai2TouchId)(A1 + i));
+                    }
+                }
+            }
+
+            // 打包自定义数据
+            LPARAM lParam = reinterpret_cast<LPARAM>(&data);
+
+            PostThreadMessage(GetCurrentThreadId(), WM_MAI2TOUCH_MESSAGE, 0, lParam);
+        }
+    }
+    return 0;
+}
 
 BOOL APIENTRY DllMain(HMODULE hMod, DWORD cause, LPVOID lpReserved)
 {
@@ -170,6 +270,7 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD cause, LPVOID lpReserved)
                 break;
             }
         });
+
         mouseController.SetCallback([&](MouseEvent ev)
         {
             if (ev.MButton)
@@ -180,6 +281,12 @@ BOOL APIENTRY DllMain(HMODULE hMod, DWORD cause, LPVOID lpReserved)
         InputManager::Install(&touchController);
         InputManager::Install(&keyboardController);
         InputManager::Install(&mouseController);
+
+        HANDLE hThread = CreateThread(NULL, 0, SerialCommThread, NULL, 0, NULL);
+        if (hThread == NULL) {
+            return FALSE;
+        }
+        CloseHandle(hThread);
     }
     else if (cause == DLL_PROCESS_DETACH) 
     {

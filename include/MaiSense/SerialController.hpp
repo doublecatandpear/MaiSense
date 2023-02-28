@@ -1,6 +1,8 @@
 #ifndef MAISENSE_SERIAL_CONTROLLER_HPP
 #define MAISENSE_SERIAL_CONTROLLER_HPP
 
+#define WM_MAI2TOUCH_MESSAGE (WM_USER + 1)
+
 #include <vector>
 #include <functional>
 #include <Windows.h>
@@ -52,10 +54,13 @@ namespace MaiSense
         bool Active;
     };
 
+    struct Mai2TouchData {
+        std::vector<Mai2TouchId> activeArea;
+    };
+
     class SerialController : public InputController
     {
     private:
-        int pHandle[16];
         std::function<void(SerialEvent)> callback;
         virtual void OnInput(int nCode, WPARAM wParam, LPARAM lParam);
 

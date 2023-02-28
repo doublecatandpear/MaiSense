@@ -1,4 +1,4 @@
-#include <MaiSense/InputManager.hpp>
+﻿#include <MaiSense/InputManager.hpp>
 #include <MaiSense/InputController.hpp>
 
 #include <detours.h>
@@ -29,7 +29,7 @@ namespace MaiSense
     char(WINAPI*  TrueGetCharacterState)(int*)                 = (char(WINAPI*)(int*))0x0060A580;
     */
 
-    DWORD(WINAPI* TrueGameInput)() = (DWORD(WINAPI*)())0x00571610;
+    DWORD(WINAPI* TrueGameInput)() = (DWORD(WINAPI*)())0x00516107;
 
     HHOOK   InputManager::hHook;
     HWND    InputManager::hWnd;
@@ -141,6 +141,7 @@ namespace MaiSense
 
     LRESULT WINAPI InputManager::GetMsgProc(int nCode, WPARAM wParam, LPARAM lParam)
     {
+        // 回调函数，用于处理截获的消息或事件
         auto msg = (LPMSG)lParam;
         if (nCode >= 0 && msg != NULL)
         {
